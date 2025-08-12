@@ -237,10 +237,9 @@ int main() {
 				Aberto(j);
 				Atencao(j);
 			}
-		} 
 		printf("\n--------------------------");
 		printf("\nCiclo de 90s Completado\n");	
 	}
-	Semaforo();
     }
+	Semaforo();
 }
