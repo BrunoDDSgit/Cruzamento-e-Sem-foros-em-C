@@ -8,9 +8,10 @@ int main() {
 	int p = 100, numeroAleatorio, i=0, c, jo;
 	char pista[3] = {'P','S','C'};
 	int segundos[4] = {0, 0, 0, 0};
+	int comparador[4] = {0, 0, 0, 0};
 	int fluxo[4] = {0, 0, 0, 0};
 	srand((unsigned)time(NULL)); 
-	
+	int situacao[] = {0, 0};
 
 	//Função numero aleatório
 	int FuncaoNumeroAleatorio(int n) {
@@ -34,7 +35,7 @@ int main() {
 		}
 	}
 
-	//Função de fluxo - Pedestres ( menor fluxo C 15% )
+	//Função de fluxo - Carros ( menor fluxo C 15% )
 	void FluxoC_Min() {
 		numeroAleatorio = 1 + FuncaoNumeroAleatorio(p);
 		if (numeroAleatorio <= 15) {
@@ -42,7 +43,7 @@ int main() {
 		}
 	}
 
-	//Função de fluxo - Pedestres ( menor fluxo 5% )
+	//Função de fluxo - Pedestres ( fluxo 5% )
 	void FluxoP() {
 		numeroAleatorio = 1 + FuncaoNumeroAleatorio(p);
 		if (numeroAleatorio <= 20) {
@@ -50,11 +51,40 @@ int main() {
 		}
 	}
 
+	//Função Verificação de Semáforo para Pedestres
+	void SemaforoPedestre() {
+	char* sentido;
+		switch(jo){
+			case 0:
+				sentido="Esquerda";
+				break;
+			case 1:
+				sentido="Superior";
+				break;
+			case 2:
+				sentido="Inferior";
+				break;
+		}
+		switch(situacao[0]){
+			case 1:
+				printf("Faixa de pedestres[faixa %s] %c: Vermelha", sentido, pista[jo]);
+				break;
+			case 2:
+				printf("Faixa de pedestres[faixa %s] %c: Verde", sentido, pista[jo]);
+				break;
+
+			default:
+				printf("Faixa de pedestres[TODOS]: Verde");
+		}
+	}
+
 	void Atencao(int c) {
+		situacao[0]=1;
 		segundos[0] = 4;
 		printf("\n--------------------------------\n");
 		if (c==0 || c ==1 || c==2) {
 			printf("\nSemaforo %c: Amarelo\n", pista[jo]);
+ 			SemaforoPedestre();
 			while(segundos[0] >= 1){
 				sleep(0);
 				printf("\nSegundos restantes %i", segundos[0]);
@@ -65,10 +95,12 @@ int main() {
 	}
 
 	void Delay(int c) {
+		situacao[0]=1;
 		segundos[1] = 4;
 		printf("\n-------------------------------\n");
 		if(c==0 || c ==1 || c==2){
 			printf("\nSemaforo %c: Vermelho(Delay)\n", pista[jo]);
+ 			SemaforoPedestre();
 			while(segundos[1] >= 1){
 				sleep(0);
 				printf("\nSegundos restantes %i", segundos[1]);
@@ -81,15 +113,30 @@ int main() {
 
 	//Semaforo Fechado 1
 	void Fechado(int c) { 
+		situacao[0]=2;
 		segundos[2] = 26;
 		printf("\n-------------------------------\n");
 		if(c==0 || c ==1 || c==2) {
 			printf("\nSemaforo %c: Vermelho\n", pista[jo]);
+ 			SemaforoPedestre();
 			while (segundos[2] > 0) {
-				sleep(0);
-				printf("\nSegundos restantes:%i", segundos[2]);
-				segundos[2]--;
+				if(segundos[2] > 5){
+					if(segundos[2]-5 < 5) {
+						segundos[2]--;
+					}
+					else{
+						printf("\nSegundos restantes:%i", segundos[2]);
+						sleep(0);
+						segundos[2] = segundos[2]-5;
+					}
+				}
+				else{
+					printf("\nSegundos restantes:%i", segundos[2]);
+					sleep(0);
+					segundos[2]--;
+				}
 			}
+
 		}
 
 		printf("\n-------------------------------\n");
@@ -97,39 +144,66 @@ int main() {
 
 	//Semaforo Fechado2
 	void Fechado2(int c) { 
+		situacao[0]=2;
 		segundos[2] = 26;
 		printf("\n-------------------------------\n");
 		if(c==0 || c ==1 || c==2) {
 			printf("\nSemaforo %c: Vermelho\n", pista[jo]);
+			SemaforoPedestre();
 				while (segundos[2] > 0) {
-				sleep(0);
-				printf("\nSegundos restantes:%i", segundos[2]);
-				segundos[2]--;
+					if(segundos[2] > 5){
+						if(segundos[2]-5 < 5) {
+							segundos[2]--;
+						}
+						else{
+							printf("\nSegundos restantes:%i", segundos[2]);
+							sleep(0);
+							segundos[2] = segundos[2]-5;
+						}
+					}
+					else{
+						printf("\nSegundos restantes:%i", segundos[2]);
+						sleep(0);
+						segundos[2]--;
+					}
 			}
 		}
 		printf("\n-------------------------------\n");
 	}
 
 	//Semaforo Aberto
+	situacao[0]=1;
 	void Aberto(int c) {
 		fluxo[jo] = 0;
 		segundos[3] = 30;
 		printf("\n-------------------------------\n");
 		if(c==0 || c ==1 || c==2) {
 			printf("Semaforo %c: Verde\n", pista[jo]);
+ 			SemaforoPedestre();
 			while(segundos[3] > 0) {
-				sleep(0);
 				if(pista[c]=='P'){
 					FluxoC_A();
 				}
 				else if(pista[c]=='S'){
 					FluxoC_M();
 				}
-				else if(pista[c]=='C'){
+				else{
 					FluxoC_Min();
 				}
-			printf("\nSegundos restantes %i | Contagem de Carros: %i", segundos[3], fluxo[jo]);
-			segundos[3]--;
+
+				if(segundos[3]%5 == 0 && segundos[3] > 5) {
+					printf("\nSegundos restantes %i | Contagem de Carros: %i", segundos[3], fluxo[jo]);
+					segundos[3]--;
+				}
+				else{
+					if(segundos[3]<=5 ){
+						printf("\nSegundos restantes %i | Contagem de Carros: %i", segundos[3], fluxo[jo]);
+						segundos[3]--;
+					}
+					else{
+						segundos[3]--;
+					}
+				}
 			}
 		}
 		printf("\n-------------------------------\n");
@@ -168,4 +242,5 @@ int main() {
 		printf("\nCiclo de 90s Completado\n");	
 	}
 	Semaforo();
+    }
 }
